@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Playback TLC</title>
+<meta name="description" content="Riproduttore di multitraccia per il culto: scalette, mixer, click, sezioni, loop e pad.">
+<meta name="theme-color" content="#0e1014">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Playback">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="start" class="start">
+  <div class="start-card">
+    <img src="icons/icon.svg" alt="" width="84" height="84">
+    <h1>Playback</h1>
+    <p>Multitraccia, click, sezioni e pad per il culto.</p>
+    <button id="startBtn" class="btn primary big">Avvia</button>
+    <p class="hint">Su iPad: Condividi → “Aggiungi alla schermata Home” per usarla a schermo intero e offline.</p>
+  </div>
+</div>
+
+<header class="topbar">
+  <button id="toggleSetlist" class="icon-btn" title="Scaletta" aria-label="Mostra scaletta">
+    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+  </button>
+  <div class="transport">
+    <button id="prevSong" class="icon-btn" title="Brano precedente (↑)" aria-label="Brano precedente">
+      <svg viewBox="0 0 24 24"><path d="M6 5v14M19 5l-10 7 10 7z"/></svg>
+    </button>
+    <button id="stopBtn" class="icon-btn" title="Stop (Esc)" aria-label="Stop">
+      <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+    </button>
+    <button id="playBtn" class="play-btn" title="Play / Pausa (Spazio)" aria-label="Play">
+      <svg class="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>
+      <svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+    </button>
+    <button id="nextSong" class="icon-btn" title="Brano successivo (↓)" aria-label="Brano successivo">
+      <svg viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z"/></svg>
+    </button>
+  </div>
+
+  <div class="now">
+    <div id="songTitle" class="song-title">Nessun brano</div>
+    <div class="song-meta">
+      <span id="songKey" class="chip">–</span>
+      <span id="songBpm" class="chip">– BPM</span>
+      <span id="songSig" class="chip">4/4</span>
+      <span id="songSection" class="chip section-chip">–</span>
+    </div>
+  </div>
+
+  <div class="clock">
+    <div id="timeElapsed" class="time-big">0:00</div>
+    <div class="time-small"><span id="timeRemain">-0:00</span> · <span id="barBeat">1.1</span></div>
+  </div>
+
+  <div class="toggles">
+    <button id="loopBtn" class="toggle" title="Loop sezione (L)">Loop</button>
+    <button id="countInBtn" class="toggle" title="Count-in">Count-in</button>
+    <button id="padBtn" class="toggle" title="Pad (P)">Pad</button>
+    <button id="settingsBtn" class="icon-btn" title="Impostazioni" aria-label="Impostazioni">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside id="setlistPanel" class="setlist-panel">
+    <div class="panel-head">
+      <select id="setlistSelect" aria-label="Scaletta"></select>
+      <button id="setlistMenuBtn" class="icon-btn small" title="Gestisci scalette" aria-label="Gestisci scalette">
+        <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+      </button>
+    </div>
+    <ol id="setlist" class="setlist"></ol>
+    <div class="panel-foot">
+      <button id="libraryBtn" class="btn">Libreria</button>
+      <button id="importBtn" class="btn primary">+ Nuovo brano</button>
+      <button id="editSetlistBtn" class="btn ghost">Modifica</button>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="wave-wrap">
+      <canvas id="wave"></canvas>
+      <div id="loading" class="loading" hidden>Caricamento…</div>
+    </div>
+
+    <div class="sections-bar">
+      <div id="sections" class="sections"></div>
+      <div class="sections-tools">
+        <select id="jumpMode" title="Quando saltare alla sezione">
+          <option value="now">Salta subito</option>
+          <option value="bar">A fine battuta</option>
+          <option value="section">A fine sezione</option>
+        </select>
+        <button id="addMarkerBtn" class="btn small" title="Aggiungi una sezione alla posizione attuale">+ Sezione</button>
+        <button id="editSongBtn" class="btn small ghost">Modifica brano</button>
+      </div>
+    </div>
+
+    <div id="mixer" class="mixer"></div>
+  </main>
+</div>
+
+<div id="empty" class="empty" hidden>
+  <h2>Benvenuto</h2>
+  <p>Importa gli stem di un brano (click, guide, batteria, basso…) con <b>+ Nuovo brano</b>.<br>
+  Puoi selezionare più file insieme dall'app File dell'iPad o dal Finder del Mac.</p>
+</div>
+
+<!-- Finestre -->
+<dialog id="dlgImport" class="dlg">
+  <form method="dialog" class="dlg-body">
+    <h2>Nuovo brano</h2>
+    <p class="hint">Seleziona tutti gli stem del brano. I file con “click” o “guide/cue” nel nome vengono riconosciuti in automatico.</p>
+    <div class="file-row">
+      <label class="btn primary">Scegli file audio<input id="impFiles" type="file" accept="audio/*,.wav,.mp3,.m4a,.aif,.aiff,.caf,.flac,.ogg" multiple hidden></label>
+      <label class="btn">Scegli cartella<input id="impFolder" type="file" webkitdirectory multiple hidden></label>
+    </div>
+    <ul id="impList" class="file-list"></ul>
+    <div class="grid2">
+      <label>Titolo<input id="impTitle" required></label>
+      <label>Artista<input id="impArtist"></label>
+      <label>BPM<input id="impBpm" type="number" min="20" max="300" step="0.01" placeholder="es. 72"></label>
+      <label>Tonalità<input id="impKey" placeholder="es. G, Bb, F#m"></label>
+      <label>Tempo<select id="impSig"></select></label>
+    </div>
+    <div id="impProgress" class="progress" hidden><div></div><span></span></div>
+    <div class="dlg-actions">
+      <button value="cancel" class="btn ghost" formnovalidate>Annulla</button>
+      <button id="impSave" value="ok" class="btn primary">Importa</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgSong" class="dlg wide">
+  <form method="dialog" class="dlg-body">
+    <h2>Modifica brano</h2>
+    <div class="grid3">
+      <label>Titolo<input id="edTitle" required></label>
+      <label>Artista<input id="edArtist"></label>
+      <label>Tonalità<input id="edKey" placeholder="es. G"></label>
+      <label>BPM<input id="edBpm" type="number" min="20" max="300" step="0.01"></label>
+      <label>Tempo<select id="edSig"></select></label>
+      <label>Primo battito (s)<input id="edFirstBeat" type="number" step="0.001" min="0" title="Dove cade il primo battito della battuta 1"></label>
+      <label>A fine brano<select id="edTransition">
+        <option value="stop">Fermati e prepara il successivo</option>
+        <option value="continue">Continua col successivo</option>
+      </select></label>
+      <label>Pausa prima del successivo (s)<input id="edGap" type="number" min="0" max="60" step="0.5"></label>
+    </div>
+
+    <h3>Sezioni</h3>
+    <ul id="edSections" class="edit-list"></ul>
+    <div class="row">
+      <button type="button" id="edAddSection" class="btn small">+ Sezione al playhead</button>
+      <button type="button" id="edBarSections" class="btn small ghost" title="Crea sezioni ogni N battute (richiede BPM)">Genera ogni 8 battute</button>
+    </div>
+
+    <h3>Tracce</h3>
+    <ul id="edTracks" class="edit-list"></ul>
+    <label class="btn small">+ Aggiungi tracce<input id="edAddTracks" type="file" accept="audio/*,.wav,.mp3,.m4a,.aif,.aiff,.caf,.flac,.ogg" multiple hidden></label>
+    <div id="edProgress" class="progress" hidden><div></div><span></span></div>
+
+    <div class="dlg-actions">
+      <button type="button" id="edDelete" class="btn danger">Elimina brano</button>
+      <span class="spacer"></span>
+      <button value="cancel" class="btn ghost" formnovalidate>Annulla</button>
+      <button id="edSave" value="ok" class="btn primary">Salva</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgLibrary" class="dlg wide">
+  <form method="dialog" class="dlg-body">
+    <h2>Libreria</h2>
+    <input id="libSearch" type="search" placeholder="Cerca brano o artista">
+    <ul id="libList" class="lib-list"></ul>
+    <div class="dlg-actions">
+      <span id="libStorage" class="hint"></span>
+      <span class="spacer"></span>
+      <button value="close" class="btn primary">Fatto</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgSettings" class="dlg wide">
+  <form method="dialog" class="dlg-body">
+    <h2>Impostazioni</h2>
+    <div class="grid2">
+      <label>Click generato<select id="setClickMode">
+        <option value="auto">Automatico (solo se il brano non ha una traccia click)</option>
+        <option value="always">Sempre</option>
+        <option value="off">Mai</option>
+      </select></label>
+      <label>Suono del click<select id="setClickSound">
+        <option value="beep">Beep</option>
+        <option value="wood">Legnetto</option>
+        <option value="hard">Duro</option>
+      </select></label>
+      <label>Battute di count-in<select id="setCountIn">
+        <option value="1">1 battuta</option>
+        <option value="2">2 battute</option>
+      </select></label>
+      <label>Durata dissolvenza pad (s)<input id="setPadFade" type="number" min="0.5" max="15" step="0.5"></label>
+    </div>
+
+    <h3>Uscite audio</h3>
+    <p class="hint">Uscite disponibili: <b id="setChannels">2</b>. Collega l'interfaccia audio e premi “Rileva uscite”. Ogni traccia ha la sua uscita nel mixer.</p>
+    <div class="row wrap">
+      <button type="button" id="setDetect" class="btn small">Rileva uscite</button>
+      <button type="button" class="btn small ghost" data-preset="all">Tutto su 1-2</button>
+      <button type="button" class="btn small ghost" data-preset="split">Click+Guide su 1 (L), tracce su 2 (R)</button>
+      <button type="button" class="btn small ghost" data-preset="multi">Click+Guide su 1-2, tracce su 3-4</button>
+    </div>
+
+    <h3>Controllo MIDI</h3>
+    <p class="hint">Note: C4 (60) Play/Pausa · D4 (62) Stop · E4 (64) Brano prec. · F4 (65) Brano succ. · G4 (67) Sezione prec. · A4 (69) Sezione succ. · B4 (71) Loop · Program Change N → brano N della scaletta.</p>
+    <div class="row"><button type="button" id="setMidi" class="btn small">Attiva MIDI</button><span id="setMidiStatus" class="hint"></span></div>
+
+    <h3>Tastiera</h3>
+    <p class="hint">Spazio play/pausa · Esc stop · ←/→ sezione · ↑/↓ brano · 1–9 sezione N · L loop · P pad</p>
+
+    <div class="dlg-actions">
+      <span class="spacer"></span>
+      <button value="close" class="btn primary">Fatto</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
